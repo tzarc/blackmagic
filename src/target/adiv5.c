@@ -368,10 +368,12 @@ static bool adiv5_component_probe(ADIv5_AP_t *ap, uint32_t addr, int recursion, 
 					DEBUG("%s-> cortexm_probe\n", indent + 1);
 					cortexm_probe(ap, false);
 					break;
+#ifdef ENABLE_CORTEX_A
 				case aa_cortexa:
 					DEBUG("%s-> cortexa_probe\n", indent + 1);
 					cortexa_probe(ap, addr);
 					break;
+#endif
 				default:
 					DEBUG("\n");
 					break;
@@ -509,6 +511,8 @@ void adiv5_dp_init(ADIv5_DP_t *dp)
 			return;
 		}
 		last_base = ap->base;
+
+#ifndef STM32_TARGETS_ONLY
 		extern void kinetis_mdm_probe(ADIv5_AP_t *);
 		kinetis_mdm_probe(ap);
 
@@ -517,6 +521,7 @@ void adiv5_dp_init(ADIv5_DP_t *dp)
 
 		extern void efm32_aap_probe(ADIv5_AP_t *);
 		efm32_aap_probe(ap);
+#endif
 
 		/* Check the Debug Base Address register. See ADIv5
 		 * Specification C2.6.1 */

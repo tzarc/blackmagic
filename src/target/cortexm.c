@@ -363,6 +363,7 @@ bool cortexm_probe(ADIv5_AP_t *ap, bool forced)
 	PROBE(stm32h7_probe);
 	PROBE(stm32l0_probe);   /* STM32L0xx & STM32L1xx */
 	PROBE(stm32l4_probe);
+#ifndef STM32_TARGETS_ONLY
 	PROBE(lpc11xx_probe);
 	PROBE(lpc15xx_probe);
 	PROBE(lpc43xx_probe);
@@ -377,6 +378,7 @@ bool cortexm_probe(ADIv5_AP_t *ap, bool forced)
 	PROBE(msp432_probe);
 	PROBE(ke04_probe);
 	PROBE(lpc17xx_probe);
+#endif
 #undef PROBE
 
 	return true;

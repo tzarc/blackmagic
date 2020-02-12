@@ -46,7 +46,9 @@ struct command_s {
 static bool cmd_version(target *t, int argc, char **argv);
 static bool cmd_help(target *t, int argc, char **argv);
 
+#ifdef ENABLE_JTAG
 static bool cmd_jtag_scan(target *t, int argc, char **argv);
+#endif
 static bool cmd_swdp_scan(target *t, int argc, char **argv);
 static bool cmd_targets(target *t, int argc, char **argv);
 static bool cmd_morse(target *t, int argc, char **argv);
@@ -66,7 +68,9 @@ static bool cmd_debug_bmp(target *t, int argc, const char **argv);
 const struct command_s cmd_list[] = {
 	{"version", (cmd_handler)cmd_version, "Display firmware version info"},
 	{"help", (cmd_handler)cmd_help, "Display help for monitor commands"},
+#ifdef ENABLE_JTAG
 	{"jtag_scan", (cmd_handler)cmd_jtag_scan, "Scan JTAG chain for devices" },
+#endif
 	{"swdp_scan", (cmd_handler)cmd_swdp_scan, "Scan SW-DP for devices" },
 	{"targets", (cmd_handler)cmd_targets, "Display list of available targets" },
 	{"morse", (cmd_handler)cmd_morse, "Display morse error message" },
@@ -164,6 +168,7 @@ bool cmd_help(target *t, int argc, char **argv)
 	return true;
 }
 
+#ifdef ENABLE_JTAG
 static bool cmd_jtag_scan(target *t, int argc, char **argv)
 {
 	(void)t;
@@ -204,6 +209,7 @@ static bool cmd_jtag_scan(target *t, int argc, char **argv)
 	morse(NULL, false);
 	return true;
 }
+#endif
 
 bool cmd_swdp_scan(target *t, int argc, char **argv)
 {

@@ -2,6 +2,12 @@ PROBE_HOST ?= native
 PLATFORM_DIR = platforms/$(PROBE_HOST)
 VPATH += $(PLATFORM_DIR) platforms/common target
 ENABLE_DEBUG ?=
+ENABLE_JTAG ?= 1
+ENABLE_CORTEX_A ?= 1
+STM32_TARGETS_ONLY ?=
+
+# Flag to simplify cutting down the firmware size when building for a small 64kB ST-Link clone (with ST Bootloader, i.e. 48kB)
+CUTDOWN_STLINK ?=
 
 ifneq ($(V), 1)
 MAKEFLAGS += --no-print-dir
@@ -16,22 +22,49 @@ ifeq ($(ENABLE_DEBUG), 1)
 CFLAGS += -DENABLE_DEBUG
 endif
 
+ifeq ($(CUTDOWN_STLINK), 1)
+ENABLE_JTAG = 0
+ENABLE_CORTEX_A = 0
+STM32_TARGETS_ONLY = 1
+endif
+
 SRC =			\
 	adiv5.c		\
-	adiv5_jtagdp.c	\
 	adiv5_swdp.c	\
 	command.c	\
-	cortexa.c	\
 	cortexm.c	\
 	crc32.c		\
-	efm32.c		\
 	exception.c	\
 	gdb_if.c	\
 	gdb_main.c	\
 	gdb_hostio.c	\
 	gdb_packet.c	\
 	hex_utils.c	\
-	jtag_devs.c	\
+	main.c		\
+	morse.c		\
+	platform.c	\
+	stm32f1.c	\
+	stm32f4.c	\
+	stm32h7.c	\
+	stm32l0.c	\
+	stm32l4.c	\
+	target.c
+
+ifeq ($(ENABLE_JTAG), 1)
+CFLAGS += -DENABLE_JTAG
+SRC += adiv5_jtagdp.c jtag_devs.c
+endif
+
+ifeq ($(ENABLE_CORTEX_A), 1)
+CFLAGS += -DENABLE_CORTEX_A
+SRC += cortexa.c
+endif
+
+ifeq ($(STM32_TARGETS_ONLY), 1)
+CFLAGS += -DSTM32_TARGETS_ONLY
+else
+SRC +=			\
+	efm32.c		\
 	lmi.c		\
 	lpc_common.c	\
 	lpc11xx.c	\
@@ -39,22 +72,14 @@ SRC =			\
 	lpc15xx.c	\
 	lpc43xx.c	\
 	kinetis.c	\
-	main.c		\
-	morse.c		\
 	msp432.c	\
 	nrf51.c		\
 	nxpke04.c	\
-	platform.c	\
 	sam3x.c		\
 	sam4l.c		\
 	samd.c		\
-	samx5x.c	\
-	stm32f1.c	\
-	stm32f4.c	\
-	stm32h7.c	\
-	stm32l0.c	\
-	stm32l4.c	\
-	target.c	\
+	samx5x.c
+endif
 
 include $(PLATFORM_DIR)/Makefile.inc
 
@@ -67,12 +92,18 @@ TARGET=blackmagic
 endif
 
 ifdef NO_OWN_LL
-SRC += jtagtap_generic.c swdptap_generic.c
+SRC += swdptap_generic.c
+ifeq ($(ENABLE_JTAG), 1)
+SRC += jtagtap_generic.c
+endif
 endif
 
 ifndef OWN_HL
-SRC += jtag_scan.c jtagtap.c swdptap.c
+SRC += swdptap.c
 SRC += remote.c
+ifeq ($(ENABLE_JTAG), 1)
+SRC += jtag_scan.c jtagtap.c
+endif
 else
 CFLAGS += -DOWN_HL
 endif

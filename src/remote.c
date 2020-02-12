@@ -144,6 +144,7 @@ void remotePacketProcessSWD(uint8_t i, char *packet)
     }
 }
 
+#ifdef ENABLE_JTAG
 void remotePacketProcessJTAG(uint8_t i, char *packet)
 {
 	uint32_t MS;
@@ -205,6 +206,7 @@ void remotePacketProcessJTAG(uint8_t i, char *packet)
 		break;
     }
 }
+#endif
 
 void remotePacketProcessGEN(uint8_t i, char *packet)
 
@@ -261,9 +263,11 @@ void remotePacketProcess(uint8_t i, char *packet)
 		remotePacketProcessSWD(i,packet);
 		break;
 
+#ifdef ENABLE_JTAG
     case REMOTE_JTAG_PACKET:
 		remotePacketProcessJTAG(i,packet);
 		break;
+#endif
 
     case REMOTE_GEN_PACKET:
 		remotePacketProcessGEN(i,packet);
